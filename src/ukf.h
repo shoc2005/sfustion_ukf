@@ -3,6 +3,9 @@
 
 #include "Eigen/Dense"
 #include "measurement_package.h"
+#include <iostream>
+
+using namespace std;
 
 class UKF {
  public:
@@ -31,15 +34,15 @@ class UKF {
 
   /**
    * Updates the state and the state covariance matrix using a laser measurement
-   * @param meas_package The measurement at k+1
+   * @param meas_package The measurement at boidk+1
    */
-  void UpdateLidar(MeasurementPackage meas_package);
+  void UpdateLidar(void);
 
   /**
    * Updates the state and the state covariance matrix using a radar measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateRadar(MeasurementPackage meas_package);
+  void UpdateRadar(void);
 
 
   // initially set to false, set to true in first call of ProcessMeasurement
@@ -95,6 +98,28 @@ class UKF {
 
   // Sigma point spreading parameter
   double lambda_;
+
+  private:
+      // augmented sigma points matrix
+      Eigen::MatrixXd Xsig_aug_;
+
+
+      // matrix for sigma points in measurement space
+      Eigen::MatrixXd Zsig_;
+      Eigen::VectorXd RadarM_;
+      Eigen::VectorXd LidarM_;
+
+
+      Eigen::VectorXd z_measurement_;
+
+      void GenerateSigmaPoints(Eigen::MatrixXd* Xsig_out);
+      void AugmentedSigmaPoints(Eigen::MatrixXd* Xsig_out);
+      void SigmaPointPrediction(Eigen::MatrixXd* Xsig_out, double delta_t);
+      void PredictMeanAndCovariance(Eigen::VectorXd* x_out, Eigen::MatrixXd* P_out);
+      void PredictRadarMeasurement(Eigen::VectorXd* z_out, Eigen::MatrixXd* S_out, Eigen::MatrixXd* Zsig_out);
+      void PredictLidarMeasurement(Eigen::VectorXd* z_out, Eigen::MatrixXd* S_out, Eigen::MatrixXd* Zsig_out);
+      void UpdateRadarState(Eigen::VectorXd* z_pred, Eigen::MatrixXd* S, Eigen::MatrixXd* Zsig);
+      void UpdateLidarState(Eigen::VectorXd* z_pred, Eigen::MatrixXd* S, Eigen::MatrixXd* Zsig);
 };
 
 #endif  // UKF_H
